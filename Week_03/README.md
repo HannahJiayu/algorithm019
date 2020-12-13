@@ -47,13 +47,76 @@ def recursion(level, param1, param2, ...):
 #### 5.二叉树的序列化与反序列化
 要点：要将一层的逻辑都处理完再做其他的事情；
 注意：字符串和int的转化可能会导致判等出现问题；利用，.join(res)来避免；
-#### 6.
+#### 6.组合
++ 如果解决一个问题有多个步骤，每一个步骤有多种方法，
+题目又要我们找出所有的方法，可以使用回溯算法；
++ 注意优化（剪枝）
++ 画搜索二叉树
+```python
+Method1:
+class Solution:
+    def combine(self, n: int, k: int) -> List[List[int]]:
+        nums = [i for i in range(1, n+1)]
+        if k == 0 or n < k:
+            return []
+        res = []
+        def backtrace(nums, path, start):
+            path.append(nums[start])
+            if len(path) == k:
+                res.append(path)
+                return
+            else:
+                for i in range(start+1, n):
+                    backtrace(nums, path[:], i)
+        for i in range(0, n-k+1):
+            backtrace(nums, [], i)
+        return res
+Method2:省空间
+class Solution:
+    def combine(self, n: int, k: int) -> List[List[int]]:
+        if k ==0 or n < k:
+            return []
+        nums = [i for i in range(1, n+1)]
+        res = []
+        def dfs(cur, path):
+            if len(path) == k:
+                res.append(path[:])
+                return
+            if cur == n:
+                return
+            path.append(nums[cur])
+            dfs(cur + 1, path)
+            path.pop()
+            dfs(cur + 1, path)
+        dfs(0, [])
+        return res
+```
+
 ## 分治、回溯的实现和特性
 ###分治
-divide -> conquer -> merge
-关键点：如何拆分子问题（依靠经验）；如何合并子问题的结果
-1.terminator 2.process（split your big problem）3.subproblem， merger4.reverse status
+divide -> conquer -> merge  
+**关键点**：如何拆分子问题（依靠经验）；如何合并子问题的结果
 
+1. terminator  
+2. process（split your big problem)  
+3. subproblem,merge
+4. reverse status
+
+###分治习题
+####1. 最大子序和
+```python
+Method1:DP
+class Solution:
+    def maxSubArray(self, nums: List[int]) -> int:
+        if not nums:
+            return 0
+        dp = [0] * len(nums)
+        dp[0] = nums[0]
+        for i in range(1, len(nums)):
+            dp[i] = max(dp[i-1]+nums[i], nums[i])
+        return max(dp)
+Method2:分治
+```
 ###回溯
 试错：不断在每一层上进行尝试；
 归去来兮的感觉
@@ -91,8 +154,57 @@ def divide_conquer(problem, param1, param2, ...):
 判断逻辑：分别递归左右子树，寻找p，q结点，根据寻找结果设计判断逻辑
 >如果左、右子树返回的结果均为非空，那么root为common ancestor
 >如果左子树为空，那么访问右子树时，第一个p，q中的结点便是anncestor
-
+#### 3.组合
++ 如果解决一个问题有多个步骤，每一个步骤有多种方法，
+题目又要我们找出所有的方法，可以使用回溯算法；
++ 注意优化（剪枝）
++ 画搜索二叉树
++ 练一下后序清理的回溯
 ps:调用递归时，可以将父节点作为参数传入
+
+####4.全排列
++ 状态变量
+>1.递归到几层depth，选了哪些数path，布尔数组used
+
+```python
+Method1:
+class Solution:
+    def permute(self, nums: List[int]) -> List[List[int]]:
+        if not nums:
+            return []
+        res = []
+        visited = [True] * len(nums)
+        def dfs(nums, depth, path, visited):
+            if depth == len(nums):
+                res.append(path[:])
+                return
+            else:
+                for i in range(len(nums)):
+                    if visited[i]:
+                        path.append(nums[i])
+                        visited[i] = False
+                        dfs(nums, depth + 1, path, visited)
+                        visited[i] = True
+                        path.pop()
+        dfs(nums, 0, [], visited)
+        return res
+Method2:
+class Solution:
+    def permute(self, nums: List[int]) -> List[List[int]]:
+        if not nums:
+            return []
+        res = []
+        def backtrace(first = 0):
+            if first == len(nums):
+                res.append(nums[:])
+            for i in range(first, len(nums)):
+                nums[first], nums[i] = nums[i], nums[first]
+                backtrace(first + 1)
+                nums[first], nums[i] = nums[i], nums[first]
+        backtrace()
+        return res
+
+```
 
 
 
